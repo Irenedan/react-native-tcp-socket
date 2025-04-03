@@ -185,7 +185,8 @@ RCT_EXPORT_METHOD(resume : (nonnull NSNumber *)cId) {
 
 - (void)onConnect:(TcpSocketClient *)client {
     GCDAsyncSocket *socket = [client getSocket];
-    if([socket localPort] != nil && [socket connectedPort] != nil) {
+    if([socket localHost] != nil && [socket connectedHost] != nil && [socket localPort] != nil
+        && [socket connectedPort] != nil) {
          [self sendEventWithName:@"connect"
                             body:@{
                                 @"id" : client.id,
@@ -200,7 +201,11 @@ RCT_EXPORT_METHOD(resume : (nonnull NSNumber *)cId) {
                                                                       : @"IPv6"
                                 }
                             }];
-     }
+     } else {
+          NSString *msg =
+             [NSString stringWithFormat:@"no client found with id %@", client.id];
+         [self sendEventWithName:@"error" body:@{@"id" : client.id, @"error" : msg}];
+    }
 }
 
 - (void)onListen:(TcpSocketClient *)server {
